@@ -1,0 +1,44 @@
+
+name: Diagnostico Windows
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnostico:
+    runs-on: windows-2022
+    timeout-minutes: 5
+
+    steps:
+      - name: Identificar Windows
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+
+          $os = Get-CimInstance Win32_OperatingSystem
+
+          Write-Host "Sistema: $($os.Caption)"
+          Write-Host "Versao: $($os.Version)"
+          Write-Host "Build: $($os.BuildNumber)"
+
+      - name: Verificar rede
+        shell: pwsh
+        run: |
+          Get-NetIPConfiguration |
+            Format-Table InterfaceAlias, IPv4Address
+
+      - name: Verificar servico RDP
+        shell: pwsh
+        run: |
+          $service = Get-Service -Name TermService
+
+          Write-Host "Servico: $($service.Name)"
+          Write-Host "Estado: $($service.Status)"
+
+      - name: Finalizar diagnostico
+        shell: pwsh
+        run: |
+          Write-Host "Diagnostico concluido."
